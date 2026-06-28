@@ -48,7 +48,7 @@ jobs:
         run: |
           # 1. Build Docker Image menggunakan direktori model lokal yang dibuat oleh modelling.py
           # Nama image formatnya: <username_docker>/<nama_image>:<tag>
-          mlflow models build-docker -m model_output -n ${{ secrets.DOCKER_USERNAME }}/bank-marketing-model:latest
+          mlflow models build-docker -m model_output -n ${{ secrets.DOCKER_USERNAME }}/bank-marketing-model:latest --env-manager=conda
           
           # 2. Push Image ke Docker Hub
           docker push ${{ secrets.DOCKER_USERNAME }}/bank-marketing-model:latest
