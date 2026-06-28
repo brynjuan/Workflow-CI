@@ -41,9 +41,7 @@ if __name__ == "__main__":
     # 3. Split Data (80% Training, 20% Testing)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    # 4. Inisiasi MLflow Run
-    mlflow.set_experiment("Bank_Marketing_Retraining")
-    
+    # 4. Inisiasi MLflow Run    
     with mlflow.start_run():
         # Hyperparameter Model
         n_estimators = 100
