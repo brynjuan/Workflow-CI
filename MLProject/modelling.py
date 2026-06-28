@@ -76,35 +76,16 @@ if __name__ == "__main__":
         mlflow.log_metric("recall", rec)
         mlflow.log_metric("f1_score", f1)
 
-# --- SOLUSI PAMUNGKAS DOCKER BUILD ---
-        # Menambahkan "nodefaults" agar terhindar dari blokir Terms of Service Anaconda
-        custom_env = {
-            "name": "mlops_env",
-            "channels": ["conda-forge", "nodefaults"],  # <--- KUNCI PENTING DI SINI
-            "dependencies": [
-                "python=3.12.7",
-                "pip",
-                {
-                    "pip": [
-                        "mlflow==2.19.0",
-                        "scikit-learn",
-                        "pandas",
-                        "cloudpickle"
-                    ]
-                }
-            ]
-        }
-
-        # Log model dengan custom_env
-        mlflow.sklearn.log_model(model, "model", conda_env=custom_env)
+        # Log model secara otomatis (tanpa custom_env)
+        mlflow.sklearn.log_model(model, "model")
         
-        # 8. Simpan Model Secara Lokal untuk Docker Build
+        # 8. Simpan Model Secara Lokal
         workspace = os.getenv("GITHUB_WORKSPACE", ".")
         local_model_path = os.path.join(workspace, "model_output")
         
         if os.path.exists(local_model_path):
             shutil.rmtree(local_model_path)
         
-        # Simpan model lokal juga dengan custom_env
-        mlflow.sklearn.save_model(model, local_model_path, conda_env=custom_env)
+        # Simpan model lokal (tanpa custom_env)
+        mlflow.sklearn.save_model(model, local_model_path)
         print(f"=== TRAINING SELESAI. Model lokal disimpan di folder '{local_model_path}' ===")
