@@ -79,9 +79,11 @@ if __name__ == "__main__":
         # Log model secara remote sebagai artefak MLflow
         mlflow.sklearn.log_model(model, "model")
         
-        # 8. Simpan Model Secara Lokal (Wajib untuk Target Advance Kriteria 3)
-        # Menghapus folder lama jika sudah ada agar tidak error saat menimpa file
-        local_model_path = "model_output"
+# 8. Simpan Model Secara Lokal (Wajib untuk Target Advance Kriteria 3)
+        # Menggunakan GITHUB_WORKSPACE agar model tersimpan di luar folder temporary MLflow
+        workspace = os.getenv("GITHUB_WORKSPACE", ".")
+        local_model_path = os.path.join(workspace, "model_output")
+        
         if os.path.exists(local_model_path):
             shutil.rmtree(local_model_path)
         
