@@ -66,7 +66,7 @@ if __name__ == "__main__":
         print(f"Recall    : {rec:.4f}")
         print(f"F1-Score  : {f1:.4f}\n")
 
-        # 7. Logging ke MLflow Server/DagsHub
+# 7. Logging parameter dan metrik ke MLflow
         print("-> Logging parameter dan metrik ke MLflow...")
         mlflow.log_param("n_estimators", n_estimators)
         mlflow.log_param("max_depth", max_depth)
@@ -76,17 +76,34 @@ if __name__ == "__main__":
         mlflow.log_metric("recall", rec)
         mlflow.log_metric("f1_score", f1)
 
-        # Log model secara remote sebagai artefak MLflow
-        mlflow.sklearn.log_model(model, "model")
+        # --- TAMBAHKAN DEFINISI ENVIRONMENT INI ---
+        # Memaksa Docker menggunakan Python 3.12 agar tidak terjadi error get-pip.py
+        custom_env = {
+            "name": "mlops_env",
+            "channels": ["conda-forge"],
+            "dependencies": [
+                "python=3.12.7",
+                "pip",
+                {
+                    "pip": [
+                        "mlflow==2.19.0",
+                        "scikit-learn",
+                        "pandas"
+                    ]
+                }
+            ]
+        }
+
+        # Log model dengan environment khusus
+        mlflow.sklearn.log_model(model, "model", conda_env=custom_env)
         
-# 8. Simpan Model Secara Lokal (Wajib untuk Target Advance Kriteria 3)
-        # Menggunakan GITHUB_WORKSPACE agar model tersimpan di luar folder temporary MLflow
+        # 8. Simpan Model Secara Lokal untuk Docker Build
         workspace = os.getenv("GITHUB_WORKSPACE", ".")
         local_model_path = os.path.join(workspace, "model_output")
         
         if os.path.exists(local_model_path):
             shutil.rmtree(local_model_path)
         
-        # Menyimpan model di root directory untuk dieksekusi oleh mlflow build-docker
-        mlflow.sklearn.save_model(model, local_model_path)
+        # Simpan model lokal juga dengan environment khusus
+        mlflow.sklearn.save_model(model, local_model_path, conda_env=custom_env)
         print(f"=== TRAINING SELESAI. Model lokal disimpan di folder '{local_model_path}' ===")
