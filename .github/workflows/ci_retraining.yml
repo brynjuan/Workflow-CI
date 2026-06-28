@@ -1,0 +1,31 @@
+name: MLflow CI Workflow
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  train-model:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install mlflow pandas scikit-learn
+
+      - name: Run MLflow Project
+        run: |
+          # Perintah ini menjalankan project MLflow berdasarkan file MLProject
+          mlflow run MLProject --no-conda
+        env:
+          MLFLOW_TRACKING_URI: ${{ secrets.DAGSHUB_TRACKING_URI }}
+          MLFLOW_TRACKING_USERNAME: ${{ secrets.DAGSHUB_USERNAME }}
+          MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_PASSWORD }}
