@@ -76,11 +76,11 @@ if __name__ == "__main__":
         mlflow.log_metric("recall", rec)
         mlflow.log_metric("f1_score", f1)
 
-        # --- SOLUSI PAMUNGKAS DOCKER BUILD ---
-        # Membuat environment stabil dengan mengunci Python 3.12.7 dan memasukkan cloudpickle
+# --- SOLUSI PAMUNGKAS DOCKER BUILD ---
+        # Menambahkan "nodefaults" agar terhindar dari blokir Terms of Service Anaconda
         custom_env = {
             "name": "mlops_env",
-            "channels": ["conda-forge"],
+            "channels": ["conda-forge", "nodefaults"],  # <--- KUNCI PENTING DI SINI
             "dependencies": [
                 "python=3.12.7",
                 "pip",
@@ -89,7 +89,7 @@ if __name__ == "__main__":
                         "mlflow==2.19.0",
                         "scikit-learn",
                         "pandas",
-                        "cloudpickle"  # Kunci utama agar Docker tidak error
+                        "cloudpickle"
                     ]
                 }
             ]
