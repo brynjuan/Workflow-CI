@@ -76,26 +76,8 @@ if __name__ == "__main__":
         mlflow.log_metric("recall", rec)
         mlflow.log_metric("f1_score", f1)
 
-        # --- TAMBAHKAN DEFINISI ENVIRONMENT INI ---
-        # Memaksa Docker menggunakan Python 3.12 agar tidak terjadi error get-pip.py
-        custom_env = {
-            "name": "mlops_env",
-            "channels": ["conda-forge"],
-            "dependencies": [
-                "python=3.12.7",
-                "pip",
-                {
-                    "pip": [
-                        "mlflow==2.19.0",
-                        "scikit-learn",
-                        "pandas"
-                    ]
-                }
-            ]
-        }
-
-        # Log model dengan environment khusus
-        mlflow.sklearn.log_model(model, "model", conda_env=custom_env)
+        # Log model secara otomatis (MLflow akan mendeteksi seluruh library dari sistem Python 3.12)
+        mlflow.sklearn.log_model(model, "model")
         
         # 8. Simpan Model Secara Lokal untuk Docker Build
         workspace = os.getenv("GITHUB_WORKSPACE", ".")
@@ -104,6 +86,6 @@ if __name__ == "__main__":
         if os.path.exists(local_model_path):
             shutil.rmtree(local_model_path)
         
-        # Simpan model lokal juga dengan environment khusus
-        mlflow.sklearn.save_model(model, local_model_path, conda_env=custom_env)
+        # Simpan model lokal (tanpa menggunakan custom_env)
+        mlflow.sklearn.save_model(model, local_model_path)
         print(f"=== TRAINING SELESAI. Model lokal disimpan di folder '{local_model_path}' ===")
