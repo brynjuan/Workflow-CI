@@ -1,4 +1,4 @@
-name: MLflow CI Workflow
+name: MLflow CI Workflow (Advance)
 
 on:
   push:
@@ -7,8 +7,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  train-model:
+  train-and-deploy:
     runs-on: ubuntu-latest
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -19,13 +20,31 @@ jobs:
           python-version: '3.12'
 
       - name: Install dependencies
-        run: pip install mlflow pandas scikit-learn
-
-      - name: Run MLflow Project
         run: |
-          # Perintah ini menjalankan project MLflow berdasarkan file MLProject
-          mlflow run MLProject --no-conda
+          python -m pip install --upgrade pip
+          pip install mlflow==2.19.0 pandas scikit-learn
+
+      # Menjalankan MLflow Project untuk Re-training
+      - name: Run MLflow Project
+        run: mlflow run MLProject --no-conda
         env:
           MLFLOW_TRACKING_URI: ${{ secrets.DAGSHUB_TRACKING_URI }}
           MLFLOW_TRACKING_USERNAME: ${{ secrets.DAGSHUB_USERNAME }}
           MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_PASSWORD }}
+
+      # Login ke Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # Build Docker Image menggunakan MLflow dan Push ke Docker Hub
+      - name: Build and Push Docker Image
+        run: |
+          # 1. Build Docker Image menggunakan direktori model lokal yang dibuat oleh modelling.py
+          # Nama image formatnya: <username_docker>/<nama_image>:<tag>
+          mlflow models build-docker -m model_output -n ${{ secrets.DOCKER_USERNAME }}/bank-marketing-model:latest
+          
+          # 2. Push Image ke Docker Hub
+          docker push ${{ secrets.DOCKER_USERNAME }}/bank-marketing-model:latest
